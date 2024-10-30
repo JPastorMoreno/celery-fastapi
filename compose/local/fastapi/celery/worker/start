@@ -1,5 +1,5 @@
 #!/bin/bash
-
+## Primera Iteración
 # set -o errexit
 # set -o nounset
 
