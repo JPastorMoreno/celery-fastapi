@@ -25,7 +25,11 @@ def sample_task(email):
     from project.users.views import api_call
 
     api_call(email)
-
+    
+    
+@shared_task(name="task_schedule_work")
+def task_schedule_work():
+    logger.info("task_schedule_work run")
 
 @shared_task(bind=True)
 def task_process_notification(self):
