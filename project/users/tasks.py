@@ -52,3 +52,17 @@ def task_postrun_handler(task_id, **kwargs):
     async_to_sync(update_celery_task_status)(task_id)
     from project.ws.views import update_celery_task_status_socketio  # new
     update_celery_task_status_socketio(task_id)                            # new
+
+@shared_task(name="default:dynamic_example_one")
+def dynamic_example_one():
+    logger.info("Example One")
+
+
+@shared_task(name="low_priority:dynamic_example_two")
+def dynamic_example_two():
+    logger.info("Example Two")
+
+
+@shared_task(name="high_priority:dynamic_example_three")
+def dynamic_example_three():
+    logger.info("Example Three")

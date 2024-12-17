@@ -2,6 +2,15 @@ import os
 import pathlib
 from functools import lru_cache
 
+from kombu import Queue
+
+
+def route_task(name, args, kwargs, options, task=None, **kw):
+    if ":" in name:
+        queue, _ = name.split(":")
+        return {"queue": queue}
+    return {"queue": "default"}
+
 
 class BaseConfig:
     BASE_DIR: pathlib.Path = pathlib.Path(__file__).parent.parent
@@ -27,6 +36,21 @@ class BaseConfig:
         #     "schedule": 5.0,  # five seconds
         # },
     }
+    
+    CELERY_TASK_DEFAULT_QUEUE: str = "default"
+
+    # Force all queues to be explicitly listed in `CELERY_TASK_QUEUES` to help prevent typos
+    CELERY_TASK_CREATE_MISSING_QUEUES: bool = False
+
+    CELERY_TASK_QUEUES: list = (#type:ignore
+        # need to define default queue here or exception would be raised
+        Queue("default"),
+
+        Queue("high_priority"),
+        Queue("low_priority"),
+    )
+    CELERY_TASK_ROUTES = (route_task,)
+    
 
 
 class DevelopmentConfig(BaseConfig):
