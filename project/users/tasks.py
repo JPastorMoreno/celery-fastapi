@@ -1,5 +1,6 @@
 import random
 
+import celery as celery
 import requests
 from asgiref.sync import async_to_sync  # type: ignore
 from celery import shared_task
@@ -31,18 +32,18 @@ def sample_task(email):
 def task_schedule_work():
     logger.info("task_schedule_work run")
 
-@shared_task(bind=True)
-def task_process_notification(self):
-    try:
-        if not random.choice([0, 1]):
-            # mimic random error
-            raise Exception()
+# @shared_task(bind=True)
+# def task_process_notification(self):
+#     try:
+#         if not random.choice([0, 1]):
+#             # mimic random error
+#             raise Exception()
 
-        # this would block the I/O
-        requests.post("https://httpbin.org/delay/5")
-    except Exception as e:
-        logger.error("exception raised, it would be retry after 5 seconds")
-        raise self.retry(exc=e, countdown=5)  # Task will retry after a 5 second delay.
+#         # this would block the I/O
+#         requests.post("https://httpbin.org/delay/5")
+#     except Exception as e:
+#         logger.error("exception raised, it would be retry after 5 seconds")
+#         raise self.retry(exc=e, countdown=5)  # Task will retry after a 5 second delay.
 
 
 @task_postrun.connect
@@ -66,3 +67,33 @@ def dynamic_example_two():
 @shared_task(name="high_priority:dynamic_example_three")
 def dynamic_example_three():
     logger.info("Example Three")
+    
+# @shared_task(bind=True)
+# def task_process_notification(self):
+#     try:
+#         if not random.choice([0, 1]):
+#             # mimic random error
+#             raise Exception()
+
+#         # this would block the I/O
+#         requests.post("https://httpbin.org/delay/5")
+#     except Exception as e:
+#         logger.error("exception raised, it would be retry after 5 seconds")
+#         raise self.retry(exc=e, countdown=5)
+    
+@shared_task(bind=True, autoretry_for=(Exception,), retry_kwargs={"max_retries": 7, "countdown": 5},retry_backoff=True,)
+def task_process_notification(self):
+    if not random.choice([0, 1]):
+        # mimic random error
+        raise Exception()
+
+    requests.post("https://httpbin.org/delay/5")
+    
+class BaseTaskWithRetry(celery.Task):
+    autoretry_for = (Exception, KeyError)
+    retry_kwargs = {"max_retries": 5}
+    retry_backoff = True
+    
+@shared_task(bind=True, base=BaseTaskWithRetry)
+def task_process_notification_with_class(self):
+    raise Exception()
