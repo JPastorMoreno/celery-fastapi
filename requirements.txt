@@ -12,3 +12,5 @@ requests==2.31.0
 asgiref==3.7.2
 asyncio-redis==0.16.0
 broadcaster==0.2.0
+python-socketio==5.7.1
+socketio

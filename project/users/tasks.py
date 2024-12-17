@@ -1,7 +1,7 @@
 import random
 
 import requests
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync  # type: ignore
 from celery import shared_task
 from celery.signals import task_postrun
 from celery.utils.log import get_task_logger
@@ -46,3 +46,5 @@ def task_postrun_handler(task_id, **kwargs):
     from project.ws.views import update_celery_task_status
 
     async_to_sync(update_celery_task_status)(task_id)
+    from project.ws.views import update_celery_task_status_socketio  # new
+    update_celery_task_status_socketio(task_id)                            # new

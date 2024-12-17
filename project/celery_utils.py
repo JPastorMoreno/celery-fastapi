@@ -1,12 +1,11 @@
 from celery import current_app as current_celery_app
 from celery.result import AsyncResult
-
 from project.config import settings
 
 
 def create_celery():
     celery_app = current_celery_app
-    celery_app.config_from_object(settings, namespace="CELERY")
+    celery_app.config_from_object(settings, namespace="CELERY") #type: ignore
 
     return celery_app
 

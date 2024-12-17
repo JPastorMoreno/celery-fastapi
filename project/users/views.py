@@ -31,7 +31,7 @@ def form_example_get(request: Request):
 
 @users_router.post("/form/")
 def form_example_post(user_body: UserBody):
-    task = sample_task.delay(user_body.email)
+    task = sample_task.delay(user_body.email) #type:ignore
     return JSONResponse({"task_id": task.task_id})
 
 
@@ -66,7 +66,7 @@ def webhook_test():
 
 @users_router.post("/webhook_test_async/")
 def webhook_test_async():
-    task = task_process_notification.delay()
+    task = task_process_notification.delay()#type:ignore
     print(task.id)
     return "pong"
 
@@ -74,3 +74,7 @@ def webhook_test_async():
 @users_router.get("/form_ws/")
 def form_ws_example(request: Request):
     return templates.TemplateResponse("form_ws.html", {"request": request})
+
+@users_router.get("/form_socketio/")
+def form_socketio_example(request: Request):
+    return templates.TemplateResponse("form_socketio.html", {"request": request})

@@ -1,8 +1,7 @@
 from contextlib import asynccontextmanager
 
-from broadcaster import Broadcast
+from broadcaster import Broadcast  # type: ignore
 from fastapi import FastAPI
-
 from project.config import settings
 
 broadcast = Broadcast(settings.WS_MESSAGE_QUEUE)
@@ -21,7 +20,7 @@ def create_app() -> FastAPI:
     # do this before loading routes
     from project.celery_utils import create_celery
 
-    app.celery_app = create_celery()
+    app.celery_app = create_celery() #type: ignore
 
     from project.users import users_router
 
@@ -30,6 +29,9 @@ def create_app() -> FastAPI:
     from project.ws import ws_router  # new
 
     app.include_router(ws_router)  # new
+    
+    from project.ws.views import register_socketio_app  # new
+    register_socketio_app(app)                                 # new
 
     @app.get("/")
     async def root():
