@@ -109,3 +109,8 @@ def task_send_welcome_email(user_pk):
     with db_context() as session:
         user = session.get(User, user_pk)
         logger.info(f'send email to {user.email} {user.id}') #type: ignore
+        
+        
+@shared_task()
+def task_test_logger():
+    logger.info("test")

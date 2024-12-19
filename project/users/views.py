@@ -2,6 +2,7 @@ import logging
 import random
 from string import ascii_lowercase
 
+logger = logging.getLogger(__name__)
 import requests
 from celery.result import AsyncResult
 from fastapi import Body, Depends, FastAPI, Request
@@ -98,6 +99,6 @@ def transaction_celery(session: Session = Depends(get_db_session)):
     with session.begin():
         session.add(user)
 
-    print(f'user {user.id} {user.username} is persistent now')
+    logger.info(f"user {user.id} {user.username} is persistent now")       # new
     task_send_welcome_email.delay(user.id)#type: ignore
     return {"message": "done"}
