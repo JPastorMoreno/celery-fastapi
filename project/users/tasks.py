@@ -6,6 +6,9 @@ from asgiref.sync import async_to_sync  # type: ignore
 from celery import shared_task
 from celery.signals import task_postrun
 from celery.utils.log import get_task_logger
+from project.database import db_context
+
+from .models import User
 
 logger = get_task_logger(__name__)
 
@@ -97,3 +100,12 @@ class BaseTaskWithRetry(celery.Task):
 @shared_task(bind=True, base=BaseTaskWithRetry)
 def task_process_notification_with_class(self):
     raise Exception()
+
+
+@shared_task()
+def task_send_welcome_email(user_pk):
+    from project.users.models import User
+
+    with db_context() as session:
+        user = session.get(User, user_pk)
+        logger.info(f'send email to {user.email} {user.id}') #type: ignore
