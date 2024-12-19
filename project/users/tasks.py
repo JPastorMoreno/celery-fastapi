@@ -109,7 +109,21 @@ def task_send_welcome_email(user_pk):
     with db_context() as session:
         user = session.get(User, user_pk)
         logger.info(f'send email to {user.email} {user.id}') #type: ignore
-        
+
+
+@shared_task(bind=True)
+def task_add_subscribe(self, user_pk):
+    with db_context() as session:
+        try:
+            from project.users.models import User
+
+            user:User = session.get(User, user_pk)#type:ignore
+            requests.post(
+                "https://httpbin.org/delay/5",
+                data={"email": user.email}, 
+            )
+        except Exception as exc:
+            raise self.retry(exc=exc)
         
 @shared_task()
 def task_test_logger():

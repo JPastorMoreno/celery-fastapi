@@ -15,7 +15,7 @@ from . import users_router
 from .models import User
 from .schemas import UserBody
 from .tasks import task_send_welcome_email  # type: ignore
-from .tasks import sample_task, task_process_notification
+from .tasks import sample_task, task_add_subscribe, task_process_notification
 
 logger = logging.getLogger(__name__)
 templates = Jinja2Templates(directory="project/users/templates")
@@ -102,3 +102,21 @@ def transaction_celery(session: Session = Depends(get_db_session)):
     logger.info(f"user {user.id} {user.username} is persistent now")       # new
     task_send_welcome_email.delay(user.id)#type: ignore
     return {"message": "done"}
+
+@users_router.post("/user_subscribe/")
+def user_subscribe(
+    user_body: UserBody,
+    session: Session = Depends(get_db_session)
+):
+    with session.begin():
+        user = session.query(User).filter_by(
+            username=user_body.username
+        ).first()
+        if not user:
+            user = User(
+                username=user_body.username,
+                email=user_body.email,
+            )
+            session.add(user)
+    task_add_subscribe.delay(user.id)#type: ignore
+    return {"message": "send task to Celery successfully"}
