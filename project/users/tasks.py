@@ -6,6 +6,7 @@ from asgiref.sync import async_to_sync  # type: ignore
 from celery import shared_task
 from celery.signals import task_postrun
 from celery.utils.log import get_task_logger
+from project.celery_utils import custom_celery_task
 from project.database import db_context
 
 from .models import User
@@ -128,3 +129,12 @@ def task_add_subscribe(self, user_pk):
 @shared_task()
 def task_test_logger():
     logger.info("test")
+    
+    
+@custom_celery_task(max_retries=3)
+def task_process_notification2():
+    if not random.choice([0, 1]):
+        # mimic random error
+        raise Exception()
+
+    requests.post("https://httpbin.org/delay/5")
