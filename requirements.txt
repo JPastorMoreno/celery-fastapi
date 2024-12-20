@@ -20,3 +20,6 @@ httpx==0.26.0
 factory-boy==3.3.0
 pytest-factoryboy==2.6.0
 pytest-cov==4.1.0
+#TestDriven Design
+Pillow==10.1.0
+python-multipart==0.0.6

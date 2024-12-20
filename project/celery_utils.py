@@ -1,4 +1,7 @@
+import functools
+
 from celery import current_app as current_celery_app
+from celery import shared_task
 from celery.result import AsyncResult
 from project.config import settings
 
@@ -28,3 +31,18 @@ def get_task_info(task_id):
             "state": task.state,
         }
     return response
+
+class custom_celery_task:
+
+    def __init__(self, *args, **kwargs):
+        self.task_args = args
+        self.task_kwargs = kwargs
+
+    def __call__(self, func):
+        @functools.wraps(func)
+        def wrapper_func(*args, **kwargs):
+            # you can add custom code here
+            return func(*args, **kwargs)
+
+        task_func = shared_task(*self.task_args, **self.task_kwargs)(wrapper_func)
+        return task_func
